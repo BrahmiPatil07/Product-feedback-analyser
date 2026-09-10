@@ -14,6 +14,7 @@ class ReviewInput(BaseModel):
     product_icon_url: Optional[str] = Field(None, description="URL of the app icon")
     product_category: Optional[str] = Field(None, description="App category or industry")
     source_meta: Optional[Dict] = Field(None, description="Review provenance metadata")
+    product_id: Optional[str] = Field(None, description="App Store Track ID if fetching directly")
 
 class ProductSearchResult(BaseModel):
     """Product result from public app search or curated list."""
@@ -146,6 +147,11 @@ class RoadmapItem(BaseModel):
     opportunity_score: int
     success_metric: str
     reason: str
+    what_users_want: Optional[str] = Field(None, description="Short sentence summarizing user desire")
+    recommended_action: Optional[str] = Field(None, description="Concrete recommended product action")
+    why_prioritized: Optional[str] = Field(None, description="PM rationale for roadmap placement")
+    review_count: Optional[int] = Field(None, description="Number of supporting reviews")
+    problem: Optional[str] = Field(None, description="Underlying customer problem / friction")
 
 class ProductRoadmap(BaseModel):
     """3-Horizon Actionable Product Roadmap."""
@@ -182,5 +188,4 @@ class AnalysisResponse(BaseModel):
     product_category: Optional[str] = Field("Consumer Software", description="Analyzed product category")
     product_icon_url: Optional[str] = Field(None, description="App icon URL")
     source_meta: Optional[ReviewSourceMeta] = Field(None, description="Provenance of analyzed reviews")
-
 

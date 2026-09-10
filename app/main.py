@@ -3,9 +3,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from typing import Optional
-from app.models import ReviewInput, AnalysisResponse
+from typing import Optional, List
+from app.models import (
+    ReviewInput,
+    AnalysisResponse,
+    ProductSearchResult,
+    ReviewFetchResponse,
+)
 from app.analyzer.rule_engine import RuleBasedAnalyzer
+from app.sources import AppStoreReviewSource, get_curated_apps
 from app.sample_data import (
     SAMPLE_ZOMATO_REVIEWS,
     SAMPLE_AMAZON_REVIEWS,
@@ -15,7 +21,7 @@ from app.sample_data import (
 # Initialize FastAPI application
 app = FastAPI(
     title="Product Feedback Intelligence Platform API",
-    description="Portfolio-grade feedback intelligence platform: Sentiment, Themes, Opportunity Chains, What Users Want, and 3-Horizon Roadmaps.",
+    description="Portfolio-grade feedback intelligence platform: Multi-App Selector, Live Public Review Retrieval, Opportunity Scoring, What Users Want, and 3-Horizon Roadmaps.",
     version="2.0.0",
 )
 
@@ -28,8 +34,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Instantiate analysis engine
+# Instantiate analysis engine & public review source
 analyzer = RuleBasedAnalyzer()
+review_source = AppStoreReviewSource()
 
 # API Routes
 @app.get("/api/health")
@@ -39,8 +46,33 @@ def health_check():
         "status": "healthy",
         "service": "Product Feedback Intelligence Platform",
         "engine": "v2.0-product-intelligence",
-        "ai_ready": True
+        "ai_ready": True,
+        "review_source": "Apple App Store Public RSS + Curated Registry"
     }
+
+@app.get("/api/products/curated")
+def get_popular_products():
+    """Retrieve catalog of 22 curated tier-1 apps across domains."""
+    return {
+        "count": len(get_curated_apps()),
+        "products": get_curated_apps(),
+    }
+
+@app.get("/api/products/search", response_model=List[ProductSearchResult])
+async def search_products(q: str = "", country: str = "in"):
+    """Search for apps/products via local curated registry and live iTunes Search API."""
+    results = await review_source.search_products(query=q, country=country)
+    return results
+
+@app.get("/api/products/{product_id}/reviews", response_model=ReviewFetchResponse)
+async def fetch_product_reviews(product_id: str, name: Optional[str] = "App", country: str = "in"):
+    """Retrieve the latest public reviews for a product from Apple App Store RSS feed."""
+    response = await review_source.fetch_reviews(
+        product_id=product_id,
+        product_name=name or "App",
+        country=country,
+    )
+    return response
 
 @app.get("/api/sample")
 def get_sample_reviews(dataset: Optional[str] = "zomato"):
@@ -67,26 +99,54 @@ def get_sample_reviews(dataset: Optional[str] = "zomato"):
 
 
 @app.post("/api/analyze", response_model=AnalysisResponse)
-def analyze_feedback(payload: ReviewInput):
+async def analyze_feedback(payload: ReviewInput):
     """
     Analyze customer feedback reviews.
-    Accepts either raw pasted text or structured list of reviews.
+    Accepts:
+    1. Direct product_id: Automatically fetches latest public reviews and analyzes them.
+    2. reviews: List of review strings.
+    3. raw_text: Multi-line or bulleted review text.
     """
     reviews_to_analyze = []
+    source_meta = payload.source_meta
+    product_name = payload.product_name
+    product_category = payload.product_category
+    product_icon_url = payload.product_icon_url
 
-    if payload.reviews and len(payload.reviews) > 0:
+    # Case 1: Automatic live review retrieval if product_id provided and no text given
+    if payload.product_id and not payload.reviews and not payload.raw_text:
+        fetch_result = await review_source.fetch_reviews(
+            product_id=payload.product_id,
+            product_name=payload.product_name or "Selected Product",
+        )
+        reviews_to_analyze = fetch_result.reviews
+        source_meta = fetch_result.source_meta.model_dump()
+        product_name = fetch_result.product.product_name
+        product_category = fetch_result.product.category
+        product_icon_url = fetch_result.product.icon_url
+
+    # Case 2: Structured reviews provided
+    elif payload.reviews and len(payload.reviews) > 0:
         reviews_to_analyze = [r.strip() for r in payload.reviews if r and r.strip()]
+
+    # Case 3: Raw pasted text provided
     elif payload.raw_text and payload.raw_text.strip():
         reviews_to_analyze = analyzer.parse_raw_reviews(payload.raw_text)
 
     if not reviews_to_analyze:
         raise HTTPException(
             status_code=400,
-            detail="No valid review text provided. Please paste reviews or provide a list."
+            detail="No valid reviews found. Please select a product or paste customer reviews."
         )
 
     # Perform analysis
-    result = analyzer.analyze_reviews(reviews_to_analyze)
+    result = analyzer.analyze_reviews(
+        reviews=reviews_to_analyze,
+        product_name=product_name,
+        product_category=product_category,
+        product_icon_url=product_icon_url,
+        source_meta=source_meta,
+    )
     return result
 
 # Mount static files for frontend dashboard
@@ -100,4 +160,3 @@ if os.path.exists(static_dir):
         if os.path.exists(index_file):
             return FileResponse(index_file)
         return {"message": "Frontend index.html not found"}
-
