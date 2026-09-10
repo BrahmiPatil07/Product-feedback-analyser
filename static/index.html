@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PulsePM | Product Feedback Analyser</title>
-  <meta name="description" content="Portfolio-grade product feedback analysis engine for customer reviews. Analyzes sentiment, categorizes themes, prioritizes pain points, and generates executive product briefs.">
+  <title>PulsePM | Product Feedback Intelligence Platform</title>
+  <meta name="description" content="Portfolio-grade product feedback intelligence platform. Automatically retrieve public customer reviews, extract sentiment, score product opportunities, group user desires, and compile 3-horizon roadmaps.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,14 +27,14 @@
         </div>
         <div class="brand-text">
           <span class="brand-title">Pulse<span class="gradient-text">PM</span></span>
-          <span class="brand-tagline">Product Feedback Analyser</span>
+          <span class="brand-tagline">Product Feedback Intelligence Platform</span>
         </div>
       </div>
       
       <div class="header-badges">
         <span class="status-pill status-ready">
           <span class="pulse-dot"></span>
-          Offline Rule Engine v2.0
+          Multi-Product Intelligence Engine v2.0
         </span>
         <span class="status-pill status-ai">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
@@ -47,57 +47,120 @@
   <!-- Main Content -->
   <main class="main-container">
     
-    <!-- Hero / Input Card -->
-    <section class="card input-card">
-      <div class="card-header">
-        <div>
-          <h1 class="hero-title">Turn Customer Reviews into <span class="gradient-text">Product Decisions</span></h1>
-          <p class="hero-subtitle">Paste 20–30 customer reviews from Zomato or any consumer app. Instantly extract sentiment, map 8 core themes, identify top pain points, and get PM recommendations.</p>
+    <!-- Section: Smart Product & App Selector (V2 Core Experience) -->
+    <section class="card product-selector-card" id="product-selector-section">
+      <div class="selector-header">
+        <div class="selector-badge-tag">⚡ Automated Review Intelligence</div>
+        <h1 class="hero-title">Turn Customer Reviews into <span class="gradient-text">Product Decisions</span></h1>
+        <p class="hero-subtitle">Select any popular app or search any product to automatically retrieve live App Store reviews and generate actionable product opportunities, customer voice intelligence, and 3-horizon roadmaps.</p>
+      </div>
+
+      <!-- Prominent Search Bar with Auto-suggest Dropdown -->
+      <div class="search-bar-wrapper">
+        <div class="search-input-box">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input 
+            type="text" 
+            id="app-search-input" 
+            placeholder="Search for an app or product (e.g. Spotify, Swiggy, Amazon, Uber, Blinkit, PhonePe)..." 
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="btn-search-clear" class="btn-clear-search hidden" title="Clear search">✕</button>
         </div>
-        <div class="input-actions-bar">
-          <div class="sample-btn-group">
-            <span class="sample-label">Load Samples:</span>
-            <button id="btn-load-sample" class="btn btn-secondary active-sample" data-dataset="zomato" title="Load 25 authentic Zomato customer reviews">
-              🍕 Zomato (Food)
-            </button>
-            <button id="btn-sample-amazon" class="btn btn-secondary" data-dataset="amazon" title="Load 20 authentic Amazon e-commerce customer reviews">
-              📦 Amazon (Retail)
-            </button>
-            <button id="btn-sample-saas" class="btn btn-secondary" data-dataset="saas" title="Load 15 authentic SaaS software customer reviews">
-              💻 SaaS (Software)
-            </button>
-          </div>
-          <button id="btn-clear" class="btn btn-ghost" title="Clear input text">
-            Clear
-          </button>
+
+        <!-- Search Autocomplete Dropdown -->
+        <div id="search-results-dropdown" class="search-dropdown hidden">
+          <!-- Populated dynamically via JS -->
         </div>
       </div>
 
-      <div class="textarea-wrapper">
-        <textarea 
-          id="reviews-input" 
-          placeholder="Paste reviews here from Zomato, Swiggy, Amazon, Flipkart, or any product/app (one per line, numbered list, or bullet points)...&#10;&#10;Example:&#10;1. Ordered biryani at 8 PM, delivery took 1 hour 45 mins! Food was cold.&#10;2. Payment was deducted twice from my UPI bank account but app showed failed.&#10;3. Super fast delivery and food was piping hot! Loved the butter chicken."
-          rows="8"
-          spellcheck="false"
-        ></textarea>
-        <div class="textarea-footer">
-          <span id="detected-counter" class="text-counter">0 reviews detected</span>
-          <span class="textarea-hint">Works for any consumer app, e-commerce, or SaaS platform</span>
+      <!-- Category Filter Tabs -->
+      <div class="category-tabs-container">
+        <span class="category-tabs-label">Explore Domains:</span>
+        <div class="category-tabs-row" id="category-tabs">
+          <button class="cat-pill active" data-cat="all">All Products (22)</button>
+          <button class="cat-pill" data-cat="Food & Grocery">🍔 Food &amp; Grocery</button>
+          <button class="cat-pill" data-cat="E-Commerce">🛍️ E-Commerce</button>
+          <button class="cat-pill" data-cat="Fintech">💳 Fintech</button>
+          <button class="cat-pill" data-cat="Ride Hailing">🚗 Mobility</button>
+          <button class="cat-pill" data-cat="Streaming & Media">🎵 Streaming</button>
+          <button class="cat-pill" data-cat="Social & Media">💬 Social</button>
+          <button class="cat-pill" data-cat="Professional & Learning">🎓 Work &amp; Learn</button>
+          <button class="cat-pill" data-cat="Navigation & Maps">📍 Maps</button>
         </div>
       </div>
 
-      <div class="submit-wrapper">
-        <button id="btn-analyze" class="btn btn-primary btn-glow">
-          <span class="btn-icon">⚡</span>
-          <span>Analyze Feedback Intelligence</span>
+      <!-- Popular Apps Quick-Select Grid -->
+      <div class="popular-apps-section">
+        <div class="section-label-bar">
+          <span class="quick-select-title">⚡ Quick Select Top Products:</span>
+          <span class="quick-select-hint">Click any app to automatically retrieve public reviews &amp; analyze feedback</span>
+        </div>
+        <div id="popular-apps-grid" class="popular-apps-grid">
+          <!-- Rendered dynamically via app.js -->
+        </div>
+      </div>
+
+      <!-- Collapsible Manual Input & Sample Datasets Drawer (Accordion) -->
+      <div class="manual-input-accordion">
+        <button id="btn-toggle-manual" class="accordion-toggle-btn" type="button">
+          <span class="toggle-btn-left">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <span>Or paste custom reviews manually / Load pre-loaded sample datasets</span>
+          </span>
+          <span class="accordion-icon">▾</span>
         </button>
+
+        <div id="manual-input-body" class="accordion-body collapsed">
+          <div class="manual-body-inner">
+            <div class="input-actions-bar">
+              <div class="sample-btn-group">
+                <span class="sample-label">Load Samples:</span>
+                <button id="btn-load-sample" class="btn btn-secondary active-sample" data-dataset="zomato" title="Load 25 authentic Zomato customer reviews">
+                  🍕 Zomato (Food)
+                </button>
+                <button id="btn-sample-amazon" class="btn btn-secondary" data-dataset="amazon" title="Load 20 authentic Amazon customer reviews">
+                  📦 Amazon (Retail)
+                </button>
+                <button id="btn-sample-saas" class="btn btn-secondary" data-dataset="saas" title="Load 15 authentic SaaS customer reviews">
+                  💻 SaaS (Productivity)
+                </button>
+              </div>
+              <button id="btn-clear" class="btn btn-ghost" title="Clear input text">
+                Clear
+              </button>
+            </div>
+
+            <div class="textarea-wrapper">
+              <textarea 
+                id="reviews-input" 
+                placeholder="Paste customer reviews here (one per line, numbered list, or bullet points)...&#10;&#10;Example:&#10;1. Payment failed on UPI but money was debited twice from my account.&#10;2. App crashes repeatedly when selecting payment option.&#10;3. Super fast delivery and great food packaging!"
+                rows="6"
+                spellcheck="false"
+              ></textarea>
+              <div class="textarea-footer">
+                <span id="detected-counter" class="text-counter">0 reviews detected</span>
+                <span class="textarea-hint">Accepts numbered lists, bullet points, or multi-line pasted text</span>
+              </div>
+            </div>
+
+            <div class="submit-wrapper">
+              <button id="btn-analyze" class="btn btn-primary btn-glow">
+                <span class="btn-icon">⚡</span>
+                <span>Analyze Pasted Reviews</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- Loading State -->
     <div id="loading-state" class="loading-state hidden">
       <div class="spinner"></div>
-      <p class="loading-text">Analyzing sentiment, identifying opportunity chains & compiling 3-horizon roadmap...</p>
+      <h3 id="loading-title" class="loading-title">Retrieving customer feedback...</h3>
+      <p id="loading-subtitle" class="loading-subtitle">Analyzing sentiment polarity, mapping 8 core themes, scoring product opportunities &amp; compiling 3-horizon roadmap...</p>
     </div>
 
     <!-- Error Alert -->
@@ -105,6 +168,41 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <span id="error-message"></span>
     </div>
+
+    <!-- Provenance Banner: Displays Product Provenance & Source Metadata -->
+    <section id="provenance-banner" class="provenance-banner card hidden">
+      <div class="provenance-left">
+        <img id="provenance-icon" class="provenance-app-icon" src="" alt="App Icon" />
+        <div class="provenance-meta-box">
+          <div class="provenance-title-row">
+            <h2 id="provenance-app-name" class="provenance-product-title">Product Name</h2>
+            <span id="provenance-category" class="provenance-cat-badge">Category</span>
+            <span id="provenance-rating" class="provenance-rating-badge">⭐ 4.5</span>
+          </div>
+          <p class="provenance-sub">Feedback Intelligence &amp; Product Opportunity Analysis</p>
+        </div>
+      </div>
+
+      <div class="provenance-right">
+        <div class="provenance-badges-group">
+          <span id="provenance-source" class="provenance-source-badge live">
+            <span class="dot-live"></span>
+            <span id="provenance-source-text">Apple App Store (Public RSS)</span>
+          </span>
+          <span id="provenance-count" class="provenance-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+            <span id="provenance-count-text">50 Reviews</span>
+          </span>
+          <span id="provenance-timestamp" class="provenance-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="provenance-time-text">Just now</span>
+          </span>
+        </div>
+        <button id="btn-switch-app" class="btn btn-secondary btn-sm" title="Analyze another app or search new product">
+          🔄 Select Another Product
+        </button>
+      </div>
+    </section>
 
     <!-- Dashboard Results Container -->
     <div id="dashboard-results" class="dashboard-results hidden">
@@ -193,28 +291,14 @@
         </div>
       </section>
 
-      <!-- Section 3: Top 3 Prioritized Pain Points & Solutions (Existing Feature Intact) -->
-      <section class="pain-points-section">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title">Top 3 Critical Pain Points & Solutions</h2>
-            <p class="section-subtitle">Ranked by volume of negative friction, user impact severity, and frequency.</p>
-          </div>
-        </div>
-
-        <div id="pain-points-container" class="pain-points-grid">
-          <!-- Rendered dynamically in app.js -->
-        </div>
-      </section>
-
-      <!-- Section 3B: Product Opportunity Analysis & Opportunity Scores (V2 Upgrade) -->
+      <!-- Section 3: Product Opportunity Analysis & Opportunity Scores (V2 Upgrade) -->
       <section class="opportunity-section">
         <div class="section-header">
           <div class="section-header-badge-row">
             <h2 class="section-title">Product Opportunity Analysis</h2>
-            <span class="badge badge-pos">Opportunity Score Model</span>
+            <span class="badge badge-pos">Product Opportunity Score (POS)</span>
           </div>
-          <p class="section-subtitle">Structured Innovation Pipeline: Review Evidence ➔ Domain Theme ➔ Pain Point ➔ Root Cause Hypothesis ➔ Product Opportunity ➔ Feature Recommendation.</p>
+          <p class="section-subtitle">Ranked by Frequency, Severity &amp; User Impact. Understandable in seconds — click "View Evidence" to inspect root causes and customer quotes.</p>
         </div>
 
         <div id="opportunities-container" class="opportunities-list">
@@ -222,7 +306,7 @@
         </div>
       </section>
 
-      <!-- Section 3C: What Users Want (V2 Upgrade) -->
+      <!-- Section 4: What Users Want (V2 Upgrade) -->
       <section class="card what-users-want-section">
         <div class="card-header">
           <div>
@@ -230,12 +314,12 @@
               <h2 class="card-title">What Users Want</h2>
               <span class="badge badge-desires">Customer Voice</span>
             </div>
-            <p class="section-subtitle">Differentiates explicit feature requests asked by users from friction-derived inferred needs.</p>
+            <p class="section-subtitle">Identifies what users are explicitly asking for in their feedback vs inferred needs derived from recurring friction.</p>
           </div>
           <div class="pill-group" id="request-type-filters">
             <button class="pill active" data-req-filter="all">All Desires</button>
-            <button class="pill" data-req-filter="Explicit Request">Explicit Requests</button>
-            <button class="pill" data-req-filter="Inferred Need">Inferred Needs</button>
+            <button class="pill" data-req-filter="Explicit Request">✨ Explicit Requests</button>
+            <button class="pill" data-req-filter="Inferred Need">💡 Inferred Needs</button>
           </div>
         </div>
 
@@ -244,14 +328,14 @@
         </div>
       </section>
 
-      <!-- Section 3D: Actionable Product Roadmap (NOW / NEXT / LATER) (V2 Upgrade) -->
+      <!-- Section 5: Actionable Product Roadmap (NOW / NEXT / LATER) (V2 Upgrade) -->
       <section class="roadmap-section">
         <div class="section-header">
           <div class="section-header-badge-row">
             <h2 class="section-title">Actionable Product Roadmap</h2>
             <span class="badge badge-roadmap">3-Horizon Strategy</span>
           </div>
-          <p class="section-subtitle">Prioritized execution horizons mapped by urgency, Product Opportunity Score (POS), and customer impact.</p>
+          <p class="section-subtitle">Visual and actionable execution horizons. Click any roadmap card to view problem, user desire, recommended action, and measurable target OKR.</p>
         </div>
 
         <div class="roadmap-grid">
@@ -260,7 +344,7 @@
             <div class="roadmap-column-header">
               <div class="roadmap-column-title-box">
                 <span class="roadmap-horizon-pill horizon-now">⚡ NOW</span>
-                <span class="roadmap-horizon-desc">Immediate Sprint (Blockers & Critical Wins)</span>
+                <span class="roadmap-horizon-desc">Immediate Sprint (Blockers &amp; High Friction)</span>
               </div>
               <span id="roadmap-now-count" class="roadmap-count-badge">0</span>
             </div>
@@ -274,7 +358,7 @@
             <div class="roadmap-column-header">
               <div class="roadmap-column-title-box">
                 <span class="roadmap-horizon-pill horizon-next">⏳ NEXT</span>
-                <span class="roadmap-horizon-desc">Next Cycle (Flow Optimizations & UX)</span>
+                <span class="roadmap-horizon-desc">Next Cycle (Flow Optimizations &amp; UX Lift)</span>
               </div>
               <span id="roadmap-next-count" class="roadmap-count-badge">0</span>
             </div>
@@ -288,7 +372,7 @@
             <div class="roadmap-column-header">
               <div class="roadmap-column-title-box">
                 <span class="roadmap-horizon-pill horizon-later">🔮 LATER</span>
-                <span class="roadmap-horizon-desc">Strategic Horizon (Scale & Loyalty)</span>
+                <span class="roadmap-horizon-desc">Strategic Horizon (Scale &amp; Loyalty Features)</span>
               </div>
               <span id="roadmap-later-count" class="roadmap-count-badge">0</span>
             </div>
@@ -299,7 +383,21 @@
         </div>
       </section>
 
-      <!-- Section 4: Filterable Reviews Explorer -->
+      <!-- Section 6: Top 3 Critical Pain Points & Solutions (Existing Feature Intact) -->
+      <section class="pain-points-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Top 3 Critical Pain Points &amp; Solutions</h2>
+            <p class="section-subtitle">Ranked by volume of negative friction, user impact severity, and frequency.</p>
+          </div>
+        </div>
+
+        <div id="pain-points-container" class="pain-points-grid">
+          <!-- Rendered dynamically in app.js -->
+        </div>
+      </section>
+
+      <!-- Section 7: Filterable Reviews Explorer (Existing Feature Intact) -->
       <section class="card explorer-card">
         <div class="card-header">
           <div>
@@ -346,12 +444,12 @@
         </div>
       </section>
 
-      <!-- Section 5: Executive Product Brief -->
+      <!-- Section 8: Executive Product Brief (Upgraded) -->
       <section class="card brief-card">
         <div class="card-header">
           <div>
             <h2 class="card-title">Executive Product Brief</h2>
-            <p class="section-subtitle">Ready-to-share executive summary for Product Managers, Engineering leads & stakeholders.</p>
+            <p class="section-subtitle">Ready-to-share executive summary for Product Managers, Engineering leads &amp; stakeholders.</p>
           </div>
           <div class="brief-actions">
             <button id="btn-copy-brief" class="btn btn-secondary">
@@ -373,14 +471,68 @@
     </div>
   </main>
 
+  <!-- Interactive Roadmap Item Detail Modal -->
+  <div id="roadmap-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-container card">
+      <div class="modal-header">
+        <div class="modal-header-meta">
+          <span id="modal-theme-badge" class="roadmap-theme-pill">Theme</span>
+          <span id="modal-horizon-badge" class="roadmap-horizon-pill horizon-now">⚡ NOW</span>
+          <span id="modal-pos-badge" class="pos-badge-highlight">POS: 92/100</span>
+        </div>
+        <button id="btn-close-modal" class="btn-close-modal" aria-label="Close modal">✕</button>
+      </div>
+
+      <h3 id="modal-item-title" class="modal-title">Initiative Title</h3>
+
+      <div class="modal-body">
+        <!-- Problem -->
+        <div class="modal-spec-block">
+          <span class="spec-label">🚨 Identified Problem / User Friction</span>
+          <p id="modal-item-problem" class="spec-text">-</p>
+        </div>
+
+        <!-- What Users Want -->
+        <div class="modal-spec-block spec-highlight-want">
+          <span class="spec-label">🎯 What Users Want</span>
+          <p id="modal-item-want" class="spec-text">-</p>
+        </div>
+
+        <!-- Recommended Action -->
+        <div class="modal-spec-block spec-highlight-action">
+          <span class="spec-label">⚡ Recommended Product Action / Feature Spec</span>
+          <p id="modal-item-action" class="spec-text">-</p>
+        </div>
+
+        <!-- Two-column row for Prioritization & Metric -->
+        <div class="modal-two-col">
+          <div class="modal-spec-block">
+            <span class="spec-label">⚖️ Prioritization Rationale</span>
+            <p id="modal-item-reason" class="spec-text">-</p>
+          </div>
+          <div class="modal-spec-block">
+            <span class="spec-label">🎯 Measurable Success Metric (OKR)</span>
+            <p id="modal-item-metric" class="spec-text metric-success">-</p>
+          </div>
+        </div>
+
+        <div class="modal-footer-info">
+          <span id="modal-item-count" class="text-secondary text-sm">Supported by customer reviews</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="app-footer">
     <div class="footer-container">
-      <p><strong>PulsePM</strong> • Portfolio-Quality Product Feedback Analyser • CSE & Product Engineering</p>
+      <p><strong>PulsePM</strong> • Portfolio-Quality Product Feedback Intelligence Platform • CSE &amp; Product Engineering</p>
       <div class="footer-links">
         <span>Zero Cost / Local Rule Engine</span>
         <span>•</span>
         <span>FastAPI + Vanilla CSS</span>
+        <span>•</span>
+        <span>Apple App Store Public RSS</span>
         <span>•</span>
         <span>Extensible AI Adapter</span>
       </div>
@@ -392,4 +544,3 @@
   <script src="/static/js/app.js"></script>
 </body>
 </html>
-

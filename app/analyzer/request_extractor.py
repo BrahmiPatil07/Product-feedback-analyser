@@ -165,10 +165,26 @@ class RequestExtractor:
                         roadmap_horizon=horizon,
                     )
                 )
-                request_id += 1
+        # 3. Fallback synthesis: If zero requests were identified from linguistic markers,
+        # derive Inferred Needs directly from top active Product Opportunities that have customer evidence
+        if len(requests) == 0 and opportunities:
+            for opp in opportunities[:3]:
+                if opp.evidence.review_count > 0:
+                    excerpts = opp.evidence.supporting_excerpts[:2] if opp.evidence.supporting_excerpts else ["General friction observed in user reviews."]
+                    requests.append(
+                        UserRequestItem(
+                            id=request_id,
+                            title=f"Inferred Need: {opp.users_want_short or opp.pain_point}",
+                            request_type="Inferred Need",
+                            mention_count=opp.evidence.review_count,
+                            supporting_excerpts=excerpts,
+                            linked_opportunity=opp.feature_recommendation,
+                            roadmap_horizon=opp.roadmap_horizon,
+                        )
+                    )
+                    request_id += 1
 
         # Sort: Explicit requests first, then by mention count descending
         requests.sort(key=lambda r: (1 if r.request_type == "Explicit Request" else 0, r.mention_count), reverse=True)
 
         return requests
-

@@ -282,7 +282,7 @@ class OpportunityEngine:
 
             item = RoadmapItem(
                 id=item_id,
-                title=opp.feature_recommendation,
+                title=opp.opportunity_title or opp.feature_recommendation,
                 theme=opp.theme,
                 description=opp.product_opportunity,
                 horizon=opp.roadmap_horizon,
@@ -290,6 +290,11 @@ class OpportunityEngine:
                 opportunity_score=opp.opportunity_score.total_score,
                 success_metric=opp.success_metric,
                 reason=opp.evidence.reason_for_recommendation,
+                what_users_want=opp.users_want_short or opp.pain_point,
+                recommended_action=opp.recommended_action_short or opp.feature_recommendation,
+                why_prioritized=opp.evidence.reason_for_recommendation,
+                review_count=opp.evidence.review_count,
+                problem=opp.pain_point,
             )
             item_id += 1
 
@@ -311,4 +316,3 @@ class OpportunityEngine:
             next=next_items,
             later=later_items,
         )
-

@@ -24,21 +24,39 @@ class AIAnalyzerAdapter(BaseFeedbackAnalyzer):
         """Check if an API key is provided for external LLM inference."""
         return bool(self.api_key and self.api_key.strip())
 
-    def analyze_reviews(self, reviews: List[str]) -> AnalysisResponse:
+    def analyze_reviews(
+        self,
+        reviews: List[str],
+        product_name: Optional[str] = None,
+        product_category: Optional[str] = None,
+        product_icon_url: Optional[str] = None,
+        source_meta: Optional[dict] = None,
+    ) -> AnalysisResponse:
         """
         Analyze reviews using LLM if configured; otherwise gracefully fallback
         to the local rule-based engine with zero downtime or cost.
         """
         if not self.is_ai_configured():
             # Graceful zero-config fallback to rule engine
-            return self.fallback_engine.analyze_reviews(reviews)
+            return self.fallback_engine.analyze_reviews(
+                reviews=reviews,
+                product_name=product_name,
+                product_category=product_category,
+                product_icon_url=product_icon_url,
+                source_meta=source_meta,
+            )
 
         # In production with API Key:
         # 1. Format prompt with structured JSON schema output
         # 2. Call Google GenAI SDK or OpenAI client
         # 3. Parse and validate with Pydantic AnalysisResponse
         # For now, execute local engine while preserving adapter compatibility
-        response = self.fallback_engine.analyze_reviews(reviews)
+        response = self.fallback_engine.analyze_reviews(
+            reviews=reviews,
+            product_name=product_name,
+            product_category=product_category,
+            product_icon_url=product_icon_url,
+            source_meta=source_meta,
+        )
         response.engine_version = f"hybrid-ai-ready ({self.model_name})"
         return response
-

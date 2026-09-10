@@ -26,6 +26,7 @@ from app.models import (
     ProductRoadmap,
     SentimentType,
     PriorityType,
+    ReviewSourceMeta,
 )
 
 class RuleBasedAnalyzer(BaseFeedbackAnalyzer):
@@ -170,7 +171,14 @@ class RuleBasedAnalyzer(BaseFeedbackAnalyzer):
                     flags.append(f"{theme}: {ind}")
         return flags
 
-    def analyze_reviews(self, reviews: List[str]) -> AnalysisResponse:
+    def analyze_reviews(
+        self,
+        reviews: List[str],
+        product_name: Optional[str] = None,
+        product_category: Optional[str] = None,
+        product_icon_url: Optional[str] = None,
+        source_meta: Optional[ReviewSourceMeta] = None,
+    ) -> AnalysisResponse:
         """Execute complete analysis pipeline over batch of reviews."""
         if not reviews:
             reviews = []
@@ -353,6 +361,11 @@ class RuleBasedAnalyzer(BaseFeedbackAnalyzer):
             opportunities=opportunities,
         )
 
+        # Determine display metadata
+        display_product = product_name or (source_meta.get("product_name") if isinstance(source_meta, dict) else getattr(source_meta, "product_name", None)) or "Customer App"
+        display_category = product_category or (source_meta.get("product_category") if isinstance(source_meta, dict) else getattr(source_meta, "product_category", None)) or "Consumer Software"
+        display_icon = product_icon_url or (source_meta.get("product_icon_url") if isinstance(source_meta, dict) else getattr(source_meta, "product_icon_url", None))
+
         # Generate Executive Product Brief (includes V2 roadmap & opportunity summaries)
         brief = self._generate_product_brief(
             summary=summary,
@@ -361,6 +374,8 @@ class RuleBasedAnalyzer(BaseFeedbackAnalyzer):
             opportunities=opportunities,
             roadmap=roadmap,
             user_requests=user_requests,
+            product_name=display_product,
+            source_meta=source_meta,
         )
 
         return AnalysisResponse(
@@ -373,6 +388,10 @@ class RuleBasedAnalyzer(BaseFeedbackAnalyzer):
             user_requests=user_requests,
             roadmap=roadmap,
             engine_version="v2.0-product-intelligence",
+            product_name=display_product,
+            product_category=display_category,
+            product_icon_url=display_icon,
+            source_meta=source_meta,
         )
 
     def _generate_product_brief(
@@ -383,14 +402,26 @@ class RuleBasedAnalyzer(BaseFeedbackAnalyzer):
         opportunities: List[ProductOpportunity],
         roadmap: ProductRoadmap,
         user_requests: List[UserRequestItem],
+        product_name: str = "Customer App",
+        source_meta: Optional[object] = None,
     ) -> ProductBrief:
         """Generate structured product brief and comprehensive markdown report."""
         now_str = datetime.datetime.now().strftime("%B %d, %Y")
+        if isinstance(source_meta, dict):
+            source_name = source_meta.get("source_name") or "Public Customer Reviews"
+            fetch_time = source_meta.get("fetch_timestamp") or now_str
+        elif source_meta and hasattr(source_meta, "source_name"):
+            source_name = getattr(source_meta, "source_name", "Public Customer Reviews")
+            fetch_time = getattr(source_meta, "fetch_timestamp", now_str)
+        else:
+            source_name = "Public Customer Reviews"
+            fetch_time = now_str
+
         dominant_theme = theme_stats[0].theme if theme_stats else "N/A"
         dominant_count = theme_stats[0].count if theme_stats else 0
 
         exec_summary = (
-            f"Analysis of {summary.total_reviews} customer feedback reviews reveals a Net Sentiment Score of "
+            f"Intelligence analysis of {summary.total_reviews} customer feedback reviews for {product_name} reveals a Net Sentiment Score of "
             f"{summary.net_sentiment_score:+0.1f}% ({summary.positive_pct}% positive vs {summary.negative_pct}% negative). "
             f"The primary driver of customer feedback volume is '{dominant_theme}' ({dominant_count} mentions). "
             f"Product Opportunity Scoring (POS) identifies {len(roadmap.now)} critical NOW-horizon initiatives "
@@ -398,7 +429,8 @@ class RuleBasedAnalyzer(BaseFeedbackAnalyzer):
         )
 
         key_findings = [
-            f"**Volume & Sentiment:** Evaluated {summary.total_reviews} reviews ({summary.positive_count} Positive, {summary.neutral_count} Neutral, {summary.negative_count} Negative).",
+            f"**Product & Provenance:** Analyzed {summary.total_reviews} reviews for **{product_name}** sourced from *{source_name}* ({fetch_time}).",
+            f"**Sentiment Polarity:** {summary.positive_count} Positive ({summary.positive_pct}%), {summary.neutral_count} Neutral ({summary.neutral_pct}%), {summary.negative_count} Negative ({summary.negative_pct}%).",
             f"**Top Opportunity:** '{opportunities[0].theme if opportunities else 'General'}' holds the highest Opportunity Score ({opportunities[0].opportunity_score.total_score if opportunities else 0}/100 - {opportunities[0].opportunity_score.potential_level if opportunities else 'N/A'}).",
             f"**Dominant Theme:** '{dominant_theme}' appeared in {theme_stats[0].percentage if theme_stats else 0}% of all customer reviews.",
             f"**Actionable Horizon:** {len(roadmap.now)} features scheduled for NOW (Sprint 1-2), {len(roadmap.next)} for NEXT, and {len(roadmap.later)} for LATER.",
@@ -419,8 +451,8 @@ class RuleBasedAnalyzer(BaseFeedbackAnalyzer):
 
         # Build Markdown Document
         md_lines = [
-            f"# Executive Product Brief: Customer Feedback Intelligence (V2)",
-            f"**Date:** {now_str} | **Dataset Size:** {summary.total_reviews} reviews | **Net Sentiment Score:** {summary.net_sentiment_score:+0.1f}%\n",
+            f"# Executive Product Brief: {product_name} Feedback Intelligence",
+            f"**Product:** {product_name} | **Source:** {source_name} | **Timestamp:** {fetch_time} | **Reviews Analyzed:** {summary.total_reviews} | **Net Sentiment:** {summary.net_sentiment_score:+0.1f}%\n",
             f"## 1. Executive Summary",
             f"{exec_summary}\n",
             f"## 2. Sentiment Breakdown",
@@ -462,18 +494,20 @@ class RuleBasedAnalyzer(BaseFeedbackAnalyzer):
         md_lines.extend([
             f"\n## 6. Measurable Success Metrics (OKRs)",
         ] + [f"- {target}" for target in kpi_targets] + [
-            f"\n---\n*Generated by PulsePM Intelligence Engine v2.0 (Autonomous Local Rule Engine)*"
+            f"\n---\n*Generated by PulsePM Intelligence Engine v2.0 (Product Intelligence Platform)*"
         ])
 
         markdown_content = "\n".join(md_lines)
 
         return ProductBrief(
-            title="Executive Product Brief: Customer Feedback Intelligence",
+            title=f"Executive Product Brief: {product_name} Feedback Intelligence",
             executive_summary=exec_summary,
             key_findings=key_findings,
             action_plan=action_plan,
             kpi_targets=kpi_targets,
             markdown=markdown_content,
+            product_name=product_name,
+            review_source=source_name,
+            fetch_timestamp=fetch_time,
         )
-
 
